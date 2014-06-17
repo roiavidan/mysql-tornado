@@ -11,8 +11,7 @@ setup(
     author_email='roi.avidan@terra.com.br',
     url='http://github.com/roiavidan/mysql-tornado',
     packages=['mysqltornado'],
-    license=open(os.path.join(os.path.dirname(__file__), 'LICENSE')).read(),
-    install_requires=open(os.path.join(os.path.dirname(__file__), 'requirements.txt')).read(),
+    install_requires=['tornado>=3.2', 'MySQL-python>=1.2.5'],
     platforms=['any']
 )
 
