@@ -1,10 +1,13 @@
 mysql-tornado
 =============
 
-Thread-based MySQLdb asynchronous wrapper for Tornado.
+MySQLdb asynchronous wrapper for Tornado.
+
+Features:
+* Thread-pool based
+* Transaction support
 
 Example usage:
-==============
 
     import tornado.ioloop
     import tornado.gen
