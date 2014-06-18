@@ -5,7 +5,7 @@ from distutils.core import setup
 
 setup(
     name='mysql-tornado',
-    version='0.0.2',
+    version='0.0.3',
     description=('Thread-based MySQLdb asynchronous wrapper for Tornado'),
     author='Roi Avidan',
     author_email='roi.avidan@terra.com.br',

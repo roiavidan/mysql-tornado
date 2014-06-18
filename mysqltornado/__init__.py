@@ -2,6 +2,7 @@
 
 import threading
 import MySQLdb
+import MySQLdb.cursors
 import Queue
 
 import tornado.ioloop
@@ -33,7 +34,7 @@ class MySQLConnection():
             if self.db is not None:
                 self.disconnect()
 
-            self.db = MySQLdb.connect(host=self.conn.host, port=self.conn.port, db=self.conn.db, user=self.conn.user, passwd=self.conn.pwd, use_unicode=True, charset='utf8')
+            self.db = MySQLdb.connect(host=self.conn.host, port=self.conn.port, db=self.conn.db, user=self.conn.user, passwd=self.conn.pwd, use_unicode=True, charset='utf8', cursorclass=MySQLdb.cursors.DictCursor)
             self.db.autocommit(self.conn.auto_commit)
 
         def disconnect(self):
@@ -284,4 +285,3 @@ class MySQLConnection():
         :return: Transaction instance.
         """
         return MySQLConnection.Transaction(self)
-
