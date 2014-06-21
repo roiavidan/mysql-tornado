@@ -103,7 +103,7 @@ class MySQLConnection():
                         while retries > 0:
                             try:
                                 cursor = self.db.cursor()
-                                cursor.execute(task['query'])
+                                rows_affected = cursor.execute(task['query'], task.get('args'))
                                 error = None
                                 break
                             except (AttributeError, MySQLdb.OperationalError) as e:
@@ -117,16 +117,22 @@ class MySQLConnection():
                                 error = e
                                 break
 
-                        if error is not None and retries == 0:
-                            raise Exception('Failed 3 reconnection attempts to MySQL server: {0}'.format(e))
-
-                        # Determine result reading type
-                        if task['command'] == 'select':
-                            result = list(cursor.fetchall())
-                            if len(result) == 0:
-                                result = None
-                        elif task['command'] == 'insert':
-                            result = cursor.lastrowid
+                        if error is None:
+                            # Determine result
+                            if task['command'] == 'select':
+                                # for a SELECT, we want the resultset
+                                result = list(cursor.fetchall())
+                                if len(result) == 0:
+                                    result = None
+                            elif task['command'] == 'insert':
+                                # for an INSERT, we want the new ID
+                                result = cursor.lastrowid
+                            else:
+                                # for everything else, we'll be fine with rows_affected
+                                result = rows_affected
+                        else:
+                            if retries == 0:
+                                raise Exception('Failed 3 reconnection attempts to MySQL server: {0}'.format(e))
                 except Exception as e:
                     error = e
                 finally:
@@ -152,11 +158,11 @@ class MySQLConnection():
             self.tx_id = None
 
         @tornado.gen.coroutine
-        def query(self, query):
+        def query(self, query, args=None):
             """
             Execute a query
             """
-            ret = yield self.conn.query(query, tx_id=self.tx_id)
+            ret = yield self.conn.query(query, args, tx_id=self.tx_id)
             raise tornado.gen.Return(ret)
 
         @tornado.gen.coroutine
@@ -266,15 +272,17 @@ class MySQLConnection():
         self.queue.put({'command':'abort'})
         map(lambda w: w.join(), self.workers)
 
-    def query(self, sql, tx_id=None):
+    def query(self, sql, args=None, tx_id=None):
         """
         Perform a DB query.
 
         :param sql: SQL statement to execute.
+        :param args: Optional arguments.
+        :param tx_id: Transaction ID. for internal use only!
         :return: Future instance
         """
         future = tornado.concurrent.TracebackFuture()
-        self.queue.put({'query':sql, 'command':sql.split(None, 1)[0].lower(), 'future':future, 'tx_id':tx_id})
+        self.queue.put({'query':sql, 'command':sql.split(None, 1)[0].lower(), 'future':future, 'tx_id':tx_id, 'args':args})
 
         return future
 
