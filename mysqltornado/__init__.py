@@ -10,7 +10,7 @@ import tornado.gen
 import tornado.concurrent
 
 
-class MySQLConnection():
+class MySQLConnection(object):
 
     class Worker(threading.Thread):
 
