@@ -3,6 +3,9 @@ mysql-tornado
 
 MySQLdb asynchronous wrapper for Tornado.
 
+Depends on:
+* MySQL-python
+
 Features:
 * Thread-pool based
 * Transaction support
